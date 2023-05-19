@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "testing",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namn-grg/test-cli.git"
@@ -15,5 +12,75 @@
   "bugs": {
     "url": "https://github.com/namn-grg/test-cli/issues"
   },
-  "homepage": "https://github.com/namn-grg/test-cli#readme"
+  "homepage": "https://github.com/namn-grg/test-cli#readme",
+
+  "devDependencies": {
+    "@gmrchk/cli-testing-library": "^0.1.2",
+    "@types/async-retry": "^1.3.0",
+    "@types/cross-spawn": "^6.0.2",
+    "@types/inquirer": "^8.2.1",
+    "@types/jest": "^29.2.1",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^18.0.0",
+    "@types/prompts": "^2.0.14",
+    "@types/rimraf": "^3.0.0",
+    "@types/tar": "^6.1.2",
+    "@types/update-notifier": "^6.0.1",
+    "@types/validate-npm-package-name": "^4.0.0",
+    "chalk": "^5.2.0",
+    "cross-spawn": "^7.0.3",
+    "hardhat": "^2.9.3",
+    "jest": "^29.4.3",
+    "ora": "^6.1.2",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.7.0",
+    "tsup": "^6.2.3",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "async-retry": "^1.3.3",
+    "commander": "^9.1.0",
+    "detect-package-manager": "^2.0.1",
+    "enquirer": "^2.3.6",
+    "ethers": "^5.7.2",
+    "got": "11.8.5",
+    "inquirer": "^8.2.3",
+    "js-yaml": "^4.1.0",
+    "open": "^8.4.0",
+    "prompts": "^2.4.2",
+    "rimraf": "^3.0.2",
+    "solc": "0.8.17",
+    "sync-disk-cache": "^2.1.0",
+    "tar": "^6.1.11",
+    "update-notifier": "^6.0.2",
+    "validate-npm-package-name": "^4.0.0",
+    "yaml": "^2.1.1"
+  },
+  "bin": {
+    "test-cli": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "format": "prettier --write 'src/**/*'",
+    "lint": "eslint src/",
+    "fix": "eslint src/ --fix",
+    "clean": "rm -rf dist/",
+    "cli": "node -r ts-node/register src/cli/index.ts",
+    "build": "pnpm clean && tsup --env.NODE_ENV production --minify --format cjs --external hardhat --dts-resolve",
+    "build:watch": "pnpm run build --watch",
+    "e2e": "jest"
+  },
+  "files": [
+    "src/",
+    "dist/"
+  ],
+  "tsup": {
+    "entry": [
+      "src/cli/index.ts"
+    ],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  }
 }

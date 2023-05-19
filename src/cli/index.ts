@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+import { cliVersion, pkg } from "../constants/urls";
+import { info, logger, spinner } from "../core/helpers/logger";
+import { CacheEntry } from "../core/types/cache";
+import { twCreate } from "../create/command";
+import { deploy } from "../deploy";
+import { generate } from "../generate/command";
+import { findPackageInstallation } from "../helpers/detect-local-packages";
+import { install } from "../install/command";
 import chalk from "chalk";
 import { exec, spawn } from "child_process";
 import { Command } from "commander";
@@ -8,28 +16,20 @@ import Cache from "sync-disk-cache";
 
 const main = async () => {
     // eslint-disable-next-line turbo/no-undeclared-env-vars
-    const skipIntro = process.env.THIRDWEB_CLI_SKIP_INTRO === "true";
+    const skipIntro = process.env.BICONOMY_CLI_SKIP_INTRO === "true";
   
     const program = new Command();
-    const cache = new Cache("thirdweb:cli");
+    const cache = new Cache("biconomy:cli");
   
     // yes this has to look like this, eliminates whitespace
     if (!skipIntro) {
-      console.info(`
-      $$\\     $$\\       $$\\                 $$\\                         $$\\       
-      $$ |    $$ |      \\__|                $$ |                        $$ |      
-    $$$$$$\\   $$$$$$$\\  $$\\  $$$$$$\\   $$$$$$$ |$$\\  $$\\  $$\\  $$$$$$\\  $$$$$$$\\  
-    \\_$$  _|  $$  __$$\\ $$ |$$  __$$\\ $$  __$$ |$$ | $$ | $$ |$$  __$$\\ $$  __$$\\ 
-      $$ |    $$ |  $$ |$$ |$$ |  \\__|$$ /  $$ |$$ | $$ | $$ |$$$$$$$$ |$$ |  $$ |
-      $$ |$$\\ $$ |  $$ |$$ |$$ |      $$ |  $$ |$$ | $$ | $$ |$$   ____|$$ |  $$ |
-      \\$$$$  |$$ |  $$ |$$ |$$ |      \\$$$$$$$ |\\$$$$$\\$$$$  |\\$$$$$$$\\ $$$$$$$  |
-       \\____/ \\__|  \\__|\\__|\\__|       \\_______| \\_____\\____/  \\_______|\\_______/ `);
-      console.info(`\n 💎 thirdweb-cli v${cliVersion} 💎\n`);
+      console.info(`BICONOMY ASCII ART HERE`);
+      console.info(`\n Welcome to Biconomy CLI!`);
     }
   
     program
-      .name("thirdweb-cli")
-      .description("Official thirdweb command line interface")
+      .name("biconomy-cli")
+      .description("Official biconomy command line interface")
       .version(cliVersion, "-v, --version")
       .option("--skip-update-check", "Skip check for auto updates")
       .hook("preAction", async () => {
@@ -92,11 +92,11 @@ const main = async () => {
                 );
   
                 const clonedEnvironment = { ...process.env };
-                clonedEnvironment.THIRDWEB_CLI_SKIP_INTRO = "true";
+                clonedEnvironment.BICONOMY_CLI_SKIP_INTRO = "true";
   
                 const installation = await findPackageInstallation();
   
-                // If the package isn't installed anywhere, just defer to npx thirdweb@latest
+                // If the package isn't installed anywhere, just defer to npx biconomy@latest
                 if (!installation) {
                   updateSpinner.succeed(
                     `Now using CLI version ${versionInfo.latest}. Continuing execution...`,
@@ -104,7 +104,7 @@ const main = async () => {
   
                   await new Promise((resolve, reject) => {
                     const shell = spawn(
-                      `npx --yes thirdweb@latest ${process.argv
+                      `npx --yes biconomy@latest ${process.argv
                         .slice(2)
                         .join(" ")}`,
                       [],
@@ -127,18 +127,18 @@ const main = async () => {
                 switch (installation.packageManager) {
                   case "npm":
                     command = installation.isGlobal
-                      ? `npm install -g thirdweb`
-                      : `npm install thirdweb`;
+                      ? `npm install -g biconomy`
+                      : `npm install biconomy`;
                     break;
                   case "yarn":
                     command = installation.isGlobal
-                      ? `yarn global add thirdweb`
-                      : `yarn add thirdweb`;
+                      ? `yarn global add biconomy`
+                      : `yarn add biconomy`;
                     break;
                   case "pnpm":
                     command = installation.isGlobal
-                      ? `pnpm add -g thirdweb@latest`
-                      : `pnpm add thirdweb@latest`;
+                      ? `pnpm add -g biconomy@latest`
+                      : `pnpm add biconomy@latest`;
                     break;
                   default:
                     console.error(
@@ -164,8 +164,8 @@ const main = async () => {
                 // So we need to make sure to run the command directly
                 const executionCommand =
                   !installation.isGlobal || installation.packageManager === "npm"
-                    ? `npx thirdweb`
-                    : `thirdweb`;
+                    ? `npx biconomy`
+                    : `biconomy`;
                 await new Promise((resolve, reject) => {
                   const shell = spawn(
                     `${executionCommand} ${process.argv.slice(2).join(" ")}`,
@@ -187,7 +187,7 @@ const main = async () => {
     program
       .command("install [projectPath]")
       .description(
-        "Install thirdweb into your project. If no path is specified, the current directory will be used.",
+        "Install biconomy into your project. If no path is specified, the current directory will be used.",
       )
       .option("--nightly", "Install the nightly version of packages.")
       .option("--dev", "Install the dev version of packages")
@@ -198,20 +198,16 @@ const main = async () => {
     program
       .command("create [projectType] [projectPath]")
       .description(
-        "Create a web3 app from any of our official templates: https://github.com/thirdweb-example/",
+        "Create a web3 app from any of our official templates: https://github.com/biconomy-example/",
       )
       .option("--app", "Create a web3 app.")
-      .option("--contract", "Create a web3 contract project")
       .option("--ts, --typescript", "Initialize as a TypeScript project.")
       .option("--js, --javascript", "Initialize as a JavaScript project.")
-      .option("--forge", "Initialize as a Forge project.")
-      .option("--hardhat", "Initialize as a Hardhat project.")
-      .option("--extension", "Create a smart contract extension.")
       .option("--cra", "Initialize as a Create React App project.")
       .option("--next", "Initialize as a Next.js project.")
-      .option("--vite", "Initialize as a Vite project.")
-      .option("--reactNative", "Initialize as a React Native project.")
-      .option("--express", "Initialize as a Express project.")
+      // .option("--vite", "Initialize as a Vite project.")
+      // .option("--reactNative", "Initialize as a React Native project.")
+      // .option("--express", "Initialize as a Express project.")
       .option("--node", "Initialize as a Node project.")
       .option(
         "--use-npm",
@@ -222,15 +218,11 @@ const main = async () => {
         "Explicitly tell the CLI to bootstrap the app using pnpm",
       )
       .option("--framework [name]", "The preferred framework.")
-      .option("--solana", "Initialize as a Solana project.")
-      .option("--evm", "Initialize as an Ethereum project.")
+      // .option("--solana", "Initialize as a Solana project.")
+      // .option("--evm", "Initialize as an Ethereum project.")
       .option(
         "-t, --template [name]",
-        "A template to start your project from. You can use an template repository name from the official thirdweb-example org.",
-      )
-      .option(
-        "-c, --contract-name [name]",
-        "Name of the new smart contract to create",
+        "A template to start your project from. You can use an template repository name from the official biconomy-example org.",
       )
       .action(async (type, path, options) => {
         await twCreate(type, path, options);
